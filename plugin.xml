@@ -20,7 +20,8 @@
     <preference name="APP_ID" />
     <preference name="APP_NAME" />
     <preference name="FACEBOOK_HYBRID_APP_EVENTS" default="false" />
-    <preference name="FACEBOOK_ANDROID_SDK_VERSION" default="5.13.0"/>
+    <!-- mkkim: 항시 최신버전을 받도록 한다. -->
+    <preference name="FACEBOOK_ANDROID_SDK_VERSION" default="latest.release"/>
 
     <engines>
         <!-- Requires > 3.5.0 because of the custom Framework tag for iOS [CB-6698] -->
@@ -166,9 +167,10 @@
                 <source url="https://cdn.cocoapods.org/"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="FBSDKCoreKit" spec="5.15.0"/>
-                <pod name="FBSDKLoginKit" spec="5.15.0"/>
-                <pod name="FBSDKShareKit" spec="5.15.0"/>
+                <pod name="FBSDKCoreKit" spec="16.0.1"/>
+                <pod name="FBSDKLoginKit" spec="16.0.1"/>
+                <pod name="FBSDKShareKit" spec="16.0.1"/>
+                <pod name="FBSDKGamingServicesKit" spec="16.0.1"/>
             </pods>
         </podspec>
 

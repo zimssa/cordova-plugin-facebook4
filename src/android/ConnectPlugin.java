@@ -28,9 +28,9 @@ import com.facebook.share.Sharer;
 import com.facebook.share.model.GameRequestContent;
 import com.facebook.share.model.ShareHashtag;
 import com.facebook.share.model.ShareLinkContent;
-import com.facebook.share.model.ShareOpenGraphObject;
-import com.facebook.share.model.ShareOpenGraphAction;
-import com.facebook.share.model.ShareOpenGraphContent;
+// import com.facebook.share.model.ShareOpenGraphObject;
+// import com.facebook.share.model.ShareOpenGraphAction;
+// import com.facebook.share.model.ShareOpenGraphContent;
 import com.facebook.share.widget.GameRequestDialog;
 import com.facebook.share.widget.MessageDialog;
 import com.facebook.share.widget.ShareDialog;
@@ -233,7 +233,8 @@ public class ConnectPlugin extends CordovaPlugin {
     @Override
     public void onPause(boolean multitasking) {
         super.onPause(multitasking);
-        AppEventsLogger.deactivateApp(cordova.getActivity().getApplication());
+        // com.facebook.appevents.AppEventsLogger: deactivateApp events are being logged automatically.
+        // There's no need to call deactivateApp, this is safe to remove.
     }
 
     @Override
@@ -425,67 +426,68 @@ public class ConnectPlugin extends CordovaPlugin {
             cordova.setActivityResultCallback(this);
             shareDialog.show(content);
 
-        } else if (method.equalsIgnoreCase("share_open_graph")) {
-            if (!ShareDialog.canShow(ShareOpenGraphContent.class)) {
-                callbackContext.error("Cannot show dialog");
-                return;
-            }
-            showDialogContext = callbackContext;
-            PluginResult pr = new PluginResult(PluginResult.Status.NO_RESULT);
-            pr.setKeepCallback(true);
-            showDialogContext.sendPluginResult(pr);
+        // nryang: facebook SDK 14.0.0 부터 share open graph 관련 코드 deprecated 되어 주석 처리
+        // } else if (method.equalsIgnoreCase("share_open_graph")) {
+        //     if (!ShareDialog.canShow(ShareOpenGraphContent.class)) {
+        //         callbackContext.error("Cannot show dialog");
+        //         return;
+        //     }
+        //     showDialogContext = callbackContext;
+        //     PluginResult pr = new PluginResult(PluginResult.Status.NO_RESULT);
+        //     pr.setKeepCallback(true);
+        //     showDialogContext.sendPluginResult(pr);
 
-            if (!params.containsKey("action")) {
-                callbackContext.error("Missing required parameter 'action'");
-            }
+        //     if (!params.containsKey("action")) {
+        //         callbackContext.error("Missing required parameter 'action'");
+        //     }
 
-            if (!params.containsKey("object")) {
-                callbackContext.error("Missing required parameter 'object'.");
-            }
+        //     if (!params.containsKey("object")) {
+        //         callbackContext.error("Missing required parameter 'object'.");
+        //     }
 
-            ShareOpenGraphObject.Builder objectBuilder = new ShareOpenGraphObject.Builder();
-            JSONObject jObject = new JSONObject(params.get("object"));
+        //     ShareOpenGraphObject.Builder objectBuilder = new ShareOpenGraphObject.Builder();
+        //     JSONObject jObject = new JSONObject(params.get("object"));
 
-            Iterator<?> objectKeys = jObject.keys();
+        //     Iterator<?> objectKeys = jObject.keys();
 
-            String objectType = "";
+        //     String objectType = "";
 
-            while ( objectKeys.hasNext() ) {
-                String key = (String)objectKeys.next();
-                String value = jObject.getString(key);
+        //     while ( objectKeys.hasNext() ) {
+        //         String key = (String)objectKeys.next();
+        //         String value = jObject.getString(key);
 
-                objectBuilder.putString(key, value);
+        //         objectBuilder.putString(key, value);
 
-                if (key.equals("og:type"))
-                    objectType = value;
-            }
+        //         if (key.equals("og:type"))
+        //             objectType = value;
+        //     }
 
-            if (objectType.equals("")) {
-                callbackContext.error("Missing required object parameter 'og:type'");
-            }
+        //     if (objectType.equals("")) {
+        //         callbackContext.error("Missing required object parameter 'og:type'");
+        //     }
 
-            ShareOpenGraphAction.Builder actionBuilder = new ShareOpenGraphAction.Builder();
-            actionBuilder.setActionType(params.get("action"));
+        //     ShareOpenGraphAction.Builder actionBuilder = new ShareOpenGraphAction.Builder();
+        //     actionBuilder.setActionType(params.get("action"));
 
-            if (params.containsKey("action_properties")) {
-                JSONObject jActionProperties = new JSONObject(params.get("action_properties"));
+        //     if (params.containsKey("action_properties")) {
+        //         JSONObject jActionProperties = new JSONObject(params.get("action_properties"));
 
-                Iterator<?> actionKeys = jActionProperties.keys();
+        //         Iterator<?> actionKeys = jActionProperties.keys();
 
-                while ( actionKeys.hasNext() ) {
-                    String actionKey = (String)actionKeys.next();
+        //         while ( actionKeys.hasNext() ) {
+        //             String actionKey = (String)actionKeys.next();
 
-                    actionBuilder.putString(actionKey, jActionProperties.getString(actionKey));
-                }
-            }
+        //             actionBuilder.putString(actionKey, jActionProperties.getString(actionKey));
+        //         }
+        //     }
 
-            actionBuilder.putObject(objectType, objectBuilder.build());
+        //     actionBuilder.putObject(objectType, objectBuilder.build());
 
-            ShareOpenGraphContent.Builder content = new ShareOpenGraphContent.Builder()
-                    .setPreviewPropertyName(objectType)
-                    .setAction(actionBuilder.build());
+        //     ShareOpenGraphContent.Builder content = new ShareOpenGraphContent.Builder()
+        //             .setPreviewPropertyName(objectType)
+        //             .setAction(actionBuilder.build());
 
-            shareDialog.show(content.build());
+        //     shareDialog.show(content.build());
 
         } else if (method.equalsIgnoreCase("send")) {
             if (!MessageDialog.canShow(ShareLinkContent.class)) {
@@ -501,11 +503,7 @@ public class ConnectPlugin extends CordovaPlugin {
             if(params.containsKey("link"))
                 builder.setContentUrl(Uri.parse(params.get("link")));
             if(params.containsKey("caption"))
-                builder.setContentTitle(params.get("caption"));
-            if(params.containsKey("picture"))
-                builder.setImageUrl(Uri.parse(params.get("picture")));
-            if(params.containsKey("description"))
-                builder.setContentDescription(params.get("description"));
+                builder.setQuote(params.get("caption"));
 
             messageDialog.show(builder.build());
 
@@ -728,14 +726,8 @@ public class ConnectPlugin extends CordovaPlugin {
         ShareLinkContent.Builder builder = new ShareLinkContent.Builder();
         if (paramBundle.containsKey("href"))
             builder.setContentUrl(Uri.parse(paramBundle.get("href")));
-        if (paramBundle.containsKey("caption"))
-            builder.setContentTitle(paramBundle.get("caption"));
-        if (paramBundle.containsKey("description"))
-            builder.setContentDescription(paramBundle.get("description"));
         if (paramBundle.containsKey("link"))
             builder.setContentUrl(Uri.parse(paramBundle.get("link")));
-        if (paramBundle.containsKey("picture"))
-            builder.setImageUrl(Uri.parse(paramBundle.get("picture")));
         if (paramBundle.containsKey("quote"))
             builder.setQuote(paramBundle.get("quote"));
         if (paramBundle.containsKey("hashtag"))

@@ -53,7 +53,8 @@
 }
 
 - (void) applicationDidBecomeActive:(NSNotification *) notification {
-    [FBSDKAppEvents activateApp];
+    //mkkim : FBSDK 12 버전 대응
+    [FBSDKAppEvents.shared activateApp];
     if (self.applicationWasActivated == NO) {
         self.applicationWasActivated = YES;
         [self enableHybridAppEvents];
@@ -99,20 +100,20 @@
         double value;
 
         if ([command.arguments count] == 1) {
-            [FBSDKAppEvents logEvent:eventName];
+            [FBSDKAppEvents.shared logEvent:eventName];
 
         } else {
             // argument count is not 0 or 1, must be 2 or more
             params = [command.arguments objectAtIndex:1];
             if ([command.arguments count] == 2) {
                 // If count is 2 we will just send params
-                [FBSDKAppEvents logEvent:eventName parameters:params];
+                [FBSDKAppEvents.shared logEvent:eventName parameters:params];
             }
 
             if ([command.arguments count] >= 3) {
                 // If count is 3 we will send params and a value to sum
                 value = [[command.arguments objectAtIndex:2] doubleValue];
-                [FBSDKAppEvents logEvent:eventName valueToSum:value parameters:params];
+                [FBSDKAppEvents.shared logEvent:eventName valueToSum:value parameters:params];
             }
         }
         res = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
@@ -133,7 +134,7 @@
     }
     double value = [[command.arguments objectAtIndex:0] doubleValue];
     NSString *currency = [command.arguments objectAtIndex:1];
-    [FBSDKAppEvents logPurchase:value currency:currency];
+    [FBSDKAppEvents.shared logPurchase:value currency:currency];
 
     res = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:res callbackId:command.callbackId];
@@ -150,7 +151,8 @@
 
     // this will prevent from being unable to login after updating plugin or changing permissions
     // without refreshing there will be a cache problem. This simple call should fix the problems
-    [FBSDKAccessToken refreshCurrentAccessToken:nil];
+    //mkkim : FBSDK 12 버전 대응
+    [FBSDKAccessToken refreshCurrentAccessTokenWithCompletion:nil];
 
     FBSDKLoginManagerLoginResultBlock loginHandler = ^void(FBSDKLoginManagerLoginResult *result, NSError *error) {
         if (error) {
@@ -287,14 +289,13 @@
         // Create native params
         FBSDKShareLinkContent *content = [[FBSDKShareLinkContent alloc] init];
         content.contentURL = [NSURL URLWithString:params[@"href"]];
-        content.hashtag = [FBSDKHashtag hashtagWithString:[params objectForKey:@"hashtag"]];
+        content.hashtag = [[FBSDKHashtag alloc] initWithString:[params objectForKey:@"hashtag"]];
         content.quote = params[@"quote"];
 
         self.dialogCallbackId = command.callbackId;
-        FBSDKShareDialog *dialog = [[FBSDKShareDialog alloc] init];
-        dialog.fromViewController = [self topMostController];
-        dialog.shareContent = content;
-        dialog.delegate = self;
+        //mkkim : FBSDK 12 버전 대응
+        FBSDKShareDialog *dialog = [[FBSDKShareDialog alloc] initWithViewController:[self topMostController] content:content delegate:self];
+        
         // Adopt native share sheets with the following line
         if (params[@"share_sheet"]) {
         	dialog.mode = FBSDKShareDialogModeShareSheet;
@@ -309,43 +310,44 @@
         [dialog show];
         return;
     }
-    else if ( [method isEqualToString:@"share_open_graph"] ) {
-        if(!params[@"action"] || !params[@"object"]) {
-            NSLog(@"No action or object defined");
-            return;
-        }
+    //mkkim : deprecated 
+    // else if ( [method isEqualToString:@"share_open_graph"] ) {
+    //     if(!params[@"action"] || !params[@"object"]) {
+    //         NSLog(@"No action or object defined");
+    //         return;
+    //     }
 
-        //Get object JSON
-        NSError *jsonError;
-        NSData *objectData = [params[@"object"] dataUsingEncoding:NSUTF8StringEncoding];
-        NSDictionary *json = [NSJSONSerialization JSONObjectWithData:objectData
-                                                             options:NSJSONReadingMutableContainers
-                                                               error:&jsonError];
+    //     //Get object JSON
+    //     NSError *jsonError;
+    //     NSData *objectData = [params[@"object"] dataUsingEncoding:NSUTF8StringEncoding];
+    //     NSDictionary *json = [NSJSONSerialization JSONObjectWithData:objectData
+    //                                                          options:NSJSONReadingMutableContainers
+    //                                                            error:&jsonError];
 
-        if(jsonError) {
-            NSLog(@"There was an error parsing your 'object' JSON string");
-        } else {
-            FBSDKShareOpenGraphObject *object = [FBSDKShareOpenGraphObject objectWithProperties:json];
-            if(!json[@"og:type"]) {
-                NSLog(@"No 'og:type' encountered in the object JSON. Please provide an Open Graph object type.");
-                return;
-            }
-            NSString *objectType = json[@"og:type"];
-            objectType = [objectType stringByReplacingOccurrencesOfString:@"."
-                                                               withString:@":"];
-            FBSDKShareOpenGraphAction *action = [FBSDKShareOpenGraphAction actionWithType:params[@"action"] object:object key:objectType];
+    //     if(jsonError) {
+    //         NSLog(@"There was an error parsing your 'object' JSON string");
+    //     } else {
+    //         FBSDKShareOpenGraphObject *object = [FBSDKShareOpenGraphObject objectWithProperties:json];
+    //         if(!json[@"og:type"]) {
+    //             NSLog(@"No 'og:type' encountered in the object JSON. Please provide an Open Graph object type.");
+    //             return;
+    //         }
+    //         NSString *objectType = json[@"og:type"];
+    //         objectType = [objectType stringByReplacingOccurrencesOfString:@"."
+    //                                                            withString:@":"];
+    //         FBSDKShareOpenGraphAction *action = [FBSDKShareOpenGraphAction actionWithType:params[@"action"] object:object key:objectType];
 
-            FBSDKShareOpenGraphContent *content = [[FBSDKShareOpenGraphContent alloc] init];
-            content.action = action;
-            content.previewPropertyName = objectType;
-            [FBSDKShareDialog showFromViewController:self.topMostController
-                                         withContent:content
-                                            delegate:nil];
-        }
-        return;
-    }
+    //         FBSDKShareOpenGraphContent *content = [[FBSDKShareOpenGraphContent alloc] init];
+    //         content.action = action;
+    //         content.previewPropertyName = objectType;
+    //         [FBSDKShareDialog showFromViewController:self.topMostController
+    //                                      withContent:content
+    //                                         delegate:nil];
+    //     }
+    //     return;
+    // }
     else if ([method isEqualToString:@"apprequests"]) {
-        FBSDKGameRequestDialog *dialog = [[FBSDKGameRequestDialog alloc] init];
+        FBSDKGameRequestDialog *dialog = [FBSDKGameRequestDialog alloc];
         dialog.delegate = self;
         if (![dialog canShow]) {
             CDVPluginResult *pluginResult;
@@ -421,7 +423,8 @@
     permissions = [requestPermissions copy];
 
     // Defines block that handles the Graph API response
-    FBSDKGraphRequestBlock graphHandler = ^(FBSDKGraphRequestConnection *connection, id result, NSError *error) {
+    // mkkim : FBSDK 12 버전 대응
+    FBSDKGraphRequestCompletion graphHandler = ^(id<FBSDKGraphRequestConnecting>  _Nullable connection, id  _Nullable result, NSError * _Nullable error) {
         CDVPluginResult* pluginResult;
         if (error) {
             NSString *message = error.userInfo[FBSDKErrorLocalizedDescriptionKey] ?: @"There was an error making the graph call.";
@@ -441,7 +444,7 @@
 
     // If we have permissions to request
     if ([permissions count] == 0){
-        [request startWithCompletionHandler:graphHandler];
+        [request startWithCompletion:graphHandler];
         return;
     }
 
@@ -476,7 +479,7 @@
             return;
         }
 
-        [request startWithCompletionHandler:graphHandler];
+        [request startWithCompletion:graphHandler];
     }];
 }
 
@@ -503,7 +506,7 @@
 
 - (void) activateApp:(CDVInvokedUrlCommand *)command
 {
-    [FBSDKAppEvents activateApp];
+    [FBSDKAppEvents.shared activateApp];
 }
 
 #pragma mark - Utility methods
@@ -659,7 +662,7 @@
     if ([self.webView isMemberOfClass:[WKWebView class]]){
         NSString *is_enabled = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FacebookHybridAppEvents"];
         if([is_enabled isEqualToString:@"true"]){
-            [FBSDKAppEvents augmentHybridWKWebView:(WKWebView*)self.webView];
+            [FBSDKAppEvents.shared augmentHybridWebView:(WKWebView*)self.webView];
             NSLog(@"FB Hybrid app events are enabled");
         } else {
             NSLog(@"FB Hybrid app events are not enabled");
