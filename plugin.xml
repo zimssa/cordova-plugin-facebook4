@@ -175,10 +175,10 @@
                 <source url="https://cdn.cocoapods.org/"/>
             </config>
             <pods use-frameworks="true">
-                <pod name="FBSDKCoreKit" spec="16.0.1"/>
-                <pod name="FBSDKLoginKit" spec="16.0.1"/>
-                <pod name="FBSDKShareKit" spec="16.0.1"/>
-                <pod name="FBSDKGamingServicesKit" spec="16.0.1"/>
+                <pod name="FBSDKCoreKit" spec="17.0.0"/>
+                <pod name="FBSDKLoginKit" spec="17.0.0"/>
+                <pod name="FBSDKShareKit" spec="17.0.0"/>
+                <pod name="FBSDKGamingServicesKit" spec="17.0.0"/>
             </pods>
         </podspec>
 
