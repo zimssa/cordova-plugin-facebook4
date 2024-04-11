@@ -1,15 +1,15 @@
-var exec = require('cordova/exec');
+var exec = require("cordova/exec");
 
 exports.getLoginStatus = function getLoginStatus(s, f) {
-  exec(s, f, 'FacebookConnectPlugin', 'getLoginStatus', []);
+  exec(s, f, "FacebookConnectPlugin", "getLoginStatus", []);
 };
 
 exports.showDialog = function showDialog(options, s, f) {
-  exec(s, f, 'FacebookConnectPlugin', 'showDialog', [options]);
+  exec(s, f, "FacebookConnectPlugin", "showDialog", [options]);
 };
 
 exports.login = function login(permissions, s, f) {
-  exec(s, f, 'FacebookConnectPlugin', 'login', permissions);
+  exec(s, f, "FacebookConnectPlugin", "login", permissions);
 };
 
 exports.checkHasCorrectPermissions = function checkHasCorrectPermissions(
@@ -20,8 +20,8 @@ exports.checkHasCorrectPermissions = function checkHasCorrectPermissions(
   exec(
     s,
     f,
-    'FacebookConnectPlugin',
-    'checkHasCorrectPermissions',
+    "FacebookConnectPlugin",
+    "checkHasCorrectPermissions",
     permissions
   );
 };
@@ -29,41 +29,45 @@ exports.checkHasCorrectPermissions = function checkHasCorrectPermissions(
 exports.logEvent = function logEvent(name, params, valueToSum, s, f) {
   // Prevent NSNulls getting into iOS, messes up our [command.argument count]
   if (!params && !valueToSum) {
-    exec(s, f, 'FacebookConnectPlugin', 'logEvent', [name]);
+    exec(s, f, "FacebookConnectPlugin", "logEvent", [name]);
   } else if (params && !valueToSum) {
-    exec(s, f, 'FacebookConnectPlugin', 'logEvent', [name, params]);
+    exec(s, f, "FacebookConnectPlugin", "logEvent", [name, params]);
   } else if (params && valueToSum) {
-    exec(s, f, 'FacebookConnectPlugin', 'logEvent', [name, params, valueToSum]);
+    exec(s, f, "FacebookConnectPlugin", "logEvent", [name, params, valueToSum]);
   } else {
-    f('Invalid arguments');
+    f("Invalid arguments");
   }
 };
 
 exports.logPurchase = function logPurchase(value, currency, s, f) {
-  exec(s, f, 'FacebookConnectPlugin', 'logPurchase', [value, currency]);
+  exec(s, f, "FacebookConnectPlugin", "logPurchase", [value, currency]);
 };
 
 exports.getAccessToken = function getAccessToken(s, f) {
-  exec(s, f, 'FacebookConnectPlugin', 'getAccessToken', []);
+  exec(s, f, "FacebookConnectPlugin", "getAccessToken", []);
+};
+
+exports.getAuthenticationToken = function getAuthenticationToken(s, f) {
+  exec(s, f, "FacebookConnectPlugin", "getAuthenticationToken", []);
 };
 
 exports.logout = function logout(s, f) {
-  exec(s, f, 'FacebookConnectPlugin', 'logout', []);
+  exec(s, f, "FacebookConnectPlugin", "logout", []);
 };
 
 exports.api = function api(graphPath, permissions, s, f) {
   permissions = permissions || [];
-  exec(s, f, 'FacebookConnectPlugin', 'graphApi', [graphPath, permissions]);
+  exec(s, f, "FacebookConnectPlugin", "graphApi", [graphPath, permissions]);
 };
 
 exports.getDeferredApplink = function (s, f) {
-  exec(s, f, 'FacebookConnectPlugin', 'getDeferredApplink', []);
+  exec(s, f, "FacebookConnectPlugin", "getDeferredApplink", []);
 };
 
 exports.activateApp = function (s, f) {
-  exec(s, f, 'FacebookConnectPlugin', 'activateApp', []);
+  exec(s, f, "FacebookConnectPlugin", "activateApp", []);
 };
 
 exports.getDeferredApplink = function (s, f) {
-  exec(s, f, 'FacebookConnectPlugin', 'getDeferredApplink', []);
+  exec(s, f, "FacebookConnectPlugin", "getDeferredApplink", []);
 };

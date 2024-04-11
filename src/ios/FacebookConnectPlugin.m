@@ -20,8 +20,8 @@
 @property (strong, nonatomic) NSString* gameRequestDialogCallbackId;
 @property (nonatomic, assign) BOOL applicationWasActivated;
 
-- (NSDictionary *)responseObject;
-- (NSDictionary*)parseURLParams:(NSString *)query;
+- (NSDictionary*)responseObject;
+- (NSDictionary*)parseURLParams:(NSString*)query;
 - (BOOL)isPublishPermission:(NSString*)permission;
 - (BOOL)areAllPermissionsReadPermissions:(NSArray*)permissions;
 - (void)enableHybridAppEvents;
@@ -82,6 +82,19 @@
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
+
+- (void)getAuthenticationToken:(CDVInvokedUrlCommand *)command {
+    CDVPluginResult *pluginResult;
+    if (FBSDKAuthenticationToken.currentAuthenticationToken) {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:
+                        FBSDKAuthenticationToken.currentAuthenticationToken.tokenString];
+    } else {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:
+                        @"Session not open."];
+    }
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 
 - (void)logEvent:(CDVInvokedUrlCommand *)command {
     if ([command.arguments count] == 0) {
@@ -568,10 +581,12 @@
         expiresIn = [NSString stringWithFormat:@"%0.0f", expiresTimeInterval];
     }
 
+    FBSDKAuthenticationToken *authenticationToken = FBSDKAuthenticationToken.currentAuthenticationToken;
 
     response[@"status"] = @"connected";
     response[@"authResponse"] = @{
                                   @"accessToken" : token.tokenString ? token.tokenString : @"",
+                                  @"authenticationToken": authenticationToken.tokenString ? authenticationToken.tokenString : @"",
                                   @"expiresIn" : expiresIn,
                                   @"secret" : @"...",
                                   @"session_key" : [NSNumber numberWithBool:YES],
